@@ -70,3 +70,9 @@ Then run the compiled JavaScript:
 ```
 npm start
 ``` 
+
+example command: 
+
+```
+Buy 1 ETH with 2000 USDC at market price
+```
