@@ -10,34 +10,60 @@ import { createServer } from 'http';
 
 createServer(async (req, res) => {
   switch (req.url) {
-    case '/': {
-      const result = streamText({
-        model: openai('gpt-4o'),
-        prompt: 'Invent a new holiday and describe its traditions.',
-      });
-      result.pipeDataStreamToResponse(res);
-      break;
-    }
+    case '/gmx-positions': {
+      try {
+        // Initialize GMX SDK
+        const sdk = new GmxSdk({
+          chainId: 42161,
+          rpcUrl: "https://arb1.arbitrum.io/rpc",
+          oracleUrl: "https://arbitrum-api.gmxinfra.io",
+          // For server-side implementation, you'll need to provide a walletClient directly
+          // or implement a way to receive it from the client
+          subsquidUrl: "https://gmx.squids.live/gmx-synthetics-arbitrum:live/api/graphql",
+          subgraphUrl: "https://subgraph.satsuma-prod.com/3b2ced13c8d9/gmx/synthetics-arbitrum-stats/api",
+        });
 
-    case '/stream-data': {
-      // immediately start streaming the response
-      pipeDataStreamToResponse(res, {
-        execute: async dataStreamWriter => {
-          dataStreamWriter.writeData('initialized call');
-
-          const result = streamText({
-            model: openai('gpt-4o'),
-            prompt: 'Invent a new holiday and describe its traditions.',
-          });
-
-          result.mergeIntoDataStream(dataStreamWriter);
-        },
-        onError: error => {
-          // Error messages are masked by default for security reasons.
-          // If you want to expose the error message to the client, you can do so here:
-          return error instanceof Error ? error.message : String(error);
-        },
-      });
+        // Use AI to analyze GMX market data
+        pipeDataStreamToResponse(res, {
+          execute: async dataStreamWriter => {
+            dataStreamWriter.writeData('Fetching GMX market data...');
+            
+            try {
+              const { marketsInfoData, tokensData } = await sdk.markets.getMarketsInfo();
+              dataStreamWriter.writeData('Market data retrieved successfully');
+              
+              // Set account if provided in query params (would need to parse query string properly)
+              const accountAddress = "0x1234567890abcdef1234567890abcdef12345678"; // Example address, replace with dynamic value
+              sdk.setAccount(accountAddress);
+              
+              // Get positions
+              const positions = await sdk.positions.getPositions({
+                marketsInfoData,
+                tokensData,
+                start: 0,
+                end: 1000,
+              });
+              
+              // Use AI to generate insights about the positions
+              const result = await generateText({
+                model: openai('gpt-4o'),
+                prompt: `Analyze these GMX trading positions and provide insights: ${JSON.stringify(positions)}`,
+              });
+              
+              dataStreamWriter.writeData('AI analysis of GMX positions:');
+              dataStreamWriter.writeData(result.text);
+            } catch (error) {
+              dataStreamWriter.writeData(`Error with GMX data: ${error instanceof Error ? error.message : String(error)}`);
+            }
+          },
+          onError: error => {
+            return error instanceof Error ? error.message : String(error);
+          },
+        });
+      } catch (error) {
+        res.writeHead(500);
+        res.end(JSON.stringify({ error: error instanceof Error ? error.message : String(error) }));
+      }
       break;
     }
   }
