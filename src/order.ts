@@ -143,19 +143,19 @@ export class GmxOrderManager {
     this.web3 = new Web3(rpcUrl);
     this.orderRouter = new this.web3.eth.Contract(
       ORDER_ROUTER_ABI,
-      orderRouterAddress
+      this.web3.utils.toChecksumAddress(orderRouterAddress)
     );
     this.account = this.web3.eth.accounts.privateKeyToAccount(privateKey).address;
   }
 
   async createOrder(params: CreateOrderParams): Promise<string> {
     try {
-      // Prepare order parameters
+      // Prepare order parameters with checksummed addresses
       const orderParams = {
         addresses: {
-          receiver: this.account,
-          initialCollateralToken: params.initialCollateralToken,
-          swapPath: params.swapPath,
+          receiver: this.web3.utils.toChecksumAddress(this.account),
+          initialCollateralToken: this.web3.utils.toChecksumAddress(params.initialCollateralToken),
+          swapPath: params.swapPath.map(addr => this.web3.utils.toChecksumAddress(addr)),
         },
         numbers: {
           sizeDeltaUsd: params.sizeDeltaUsd,
@@ -169,13 +169,12 @@ export class GmxOrderManager {
         referralCode: params.referralCode,
       };
 
-      // Create the order
+      // Create the order with checksummed market address
       const tx = await this.orderRouter.methods
-        .createOrder(params.marketAddress, orderParams)
+        .createOrder(this.web3.utils.toChecksumAddress(params.marketAddress), orderParams)
         .send({
-          from: this.account,
+          from: this.web3.utils.toChecksumAddress(this.account),
           value: params.executionFee,
-        //   gas: 5000000,
         });
 
       return tx.transactionHash;
