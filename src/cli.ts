@@ -1,9 +1,9 @@
 import { generateText } from "ai";
 import { openai } from "@ai-sdk/openai";
-import { GmxSdk } from "@gmx-io/sdk";
 import dotenv from "dotenv";
-import readline from "readline";
+import * as readline from "readline";
 
+// Initialize environment variables
 dotenv.config();
 
 // Initialize readline interface
@@ -13,15 +13,24 @@ const rl = readline.createInterface({
 });
 
 async function initializeGmxSdk() {
-  const sdk = new GmxSdk({
-    chainId: 42161,
-    rpcUrl: "https://arb1.arbitrum.io/rpc",
-    oracleUrl: "https://arbitrum-api.gmxinfra.io",
-    subsquidUrl: "https://gmx.squids.live/gmx-synthetics-arbitrum:live/api/graphql",
-    subgraphUrl: "https://subgraph.satsuma-prod.com/3b2ced13c8d9/gmx/synthetics-arbitrum-stats/api",
-  });
-  
-  return sdk;
+  try {
+    // Dynamically import the GMX SDK
+    const gmxSdkModule = await import('@gmx-io/sdk');
+    const GmxSdk = gmxSdkModule.GmxSdk;
+    
+    const sdk = new GmxSdk({
+      chainId: 42161,
+      rpcUrl: "https://arb1.arbitrum.io/rpc",
+      oracleUrl: "https://arbitrum-api.gmxinfra.io",
+      subsquidUrl: "https://gmx.squids.live/gmx-synthetics-arbitrum:live/api/graphql",
+      subgraphUrl: "https://subgraph.satsuma-prod.com/3b2ced13c8d9/gmx/synthetics-arbitrum-stats/api",
+    });
+    
+    return sdk;
+  } catch (error) {
+    console.error("Error initializing GMX SDK:", error);
+    throw error;
+  }
 }
 
 async function getPositions(address: string) {
@@ -29,7 +38,14 @@ async function getPositions(address: string) {
   const sdk = await initializeGmxSdk();
   
   console.log("Fetching market data...");
-  const { marketsInfoData, tokensData } = await sdk.markets.getMarketsInfo();
+  const marketsInfoResult = await sdk.markets.getMarketsInfo();
+  
+  // Ensure marketsInfoData and tokensData are defined
+  if (!marketsInfoResult || !marketsInfoResult.marketsInfoData || !marketsInfoResult.tokensData) {
+    throw new Error("Failed to fetch market data");
+  }
+  
+  const { marketsInfoData, tokensData } = marketsInfoResult;
   
   console.log(`Setting account address: ${address}`);
   const formattedAddress = address.startsWith('0x') ? address as `0x${string}` : `0x${address}` as `0x${string}`;
@@ -37,7 +53,7 @@ async function getPositions(address: string) {
   
   console.log("Retrieving positions...");
   const positions = await sdk.positions.getPositions({
-    marketsInfoData,
+    marketsData: marketsInfoData,
     tokensData,
     start: 0,
     end: 1000,
@@ -68,24 +84,27 @@ async function main() {
     try {
       const { positions } = await getPositions(walletAddress);
       
-      if (positions.length === 0) {
+      // Check if positions is an array and has a length property
+      const positionsArray = Array.isArray(positions) ? positions : [];
+      
+      if (positionsArray.length === 0) {
         console.log("No positions found for this address.");
         rl.close();
         return;
       }
       
-      console.log(`Found ${positions.length} positions.`);
+      console.log(`Found ${positionsArray.length} positions.`);
       
       rl.question("Do you want AI analysis of these positions? (y/n): ", async (answer) => {
         if (answer.toLowerCase() === 'y') {
-          const analysis = await analyzePositions(positions);
+          const analysis = await analyzePositions(positionsArray);
           console.log("\nAI Analysis:");
           console.log("===========");
           console.log(analysis);
         } else {
           console.log("\nPositions:");
           console.log("==========");
-          console.log(JSON.stringify(positions, null, 2));
+          console.log(JSON.stringify(positionsArray, null, 2));
         }
         
         rl.close();
