@@ -18,13 +18,23 @@ async function initializeGmxSdk() {
     const gmxSdkModule = await import('@gmx-io/sdk');
     const GmxSdk = gmxSdkModule.GmxSdk;
     
+    // const sdk = new GmxSdk({
+    //   chainId: 42161,
+    //   rpcUrl: "https://arb1.arbitrum.io/rpc",
+    //   oracleUrl: "https://arbitrum-api.gmxinfra.io",
+    //   subsquidUrl: "https://gmx.squids.live/gmx-synthetics-arbitrum:live/api/graphql",
+    //   subgraphUrl: "https://subgraph.satsuma-prod.com/3b2ced13c8d9/gmx/synthetics-arbitrum-stats/api",
+    // });
     const sdk = new GmxSdk({
       chainId: 42161,
-      rpcUrl: "https://arb1.arbitrum.io/rpc",
       oracleUrl: "https://arbitrum-api.gmxinfra.io",
-      subsquidUrl: "https://gmx.squids.live/gmx-synthetics-arbitrum:live/api/graphql",
-      subgraphUrl: "https://subgraph.satsuma-prod.com/3b2ced13c8d9/gmx/synthetics-arbitrum-stats/api",
+      rpcUrl: "https://arb1.arbitrum.io/rpc",
+      subgraph: {
+        subsquid:
+          "https://gmx.squids.live/gmx-synthetics-arbitrum:live/api/graphql",
+      },
     });
+    
     
     return sdk;
   } catch (error) {
@@ -53,11 +63,13 @@ async function getPositions(address: string) {
   
   console.log("Retrieving positions...");
   const positions = await sdk.positions.getPositions({
-    marketsData: marketsInfoData,
+    marketsInfoData: marketsInfoData,
     tokensData,
-    start: 0,
-    end: 1000,
+    // start: 0,
+    // end: 1000,
   });
+
+  console.log(positions);
   
   return { positions, sdk, marketsInfoData, tokensData };
 }
