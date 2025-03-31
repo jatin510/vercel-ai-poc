@@ -100,7 +100,7 @@ async function processOrderRequest(userInput: string) {
       prompt: `Create a GMX order based on the following request: "${userInput}"
       Current market prices: ${JSON.stringify(marketData, null, 2)}
       
-      Please provide the order parameters in the following JSON format:
+      Return ONLY a JSON object in the following format, with no additional text or explanation:
       {
         "marketAddress": "address",
         "collateralToken": "address",
@@ -124,12 +124,21 @@ async function processOrderRequest(userInput: string) {
       Make sure to use proper decimal places (6 for USDC, 18 for ETH, 8 for BTC)
       Use the current market prices to calculate appropriate values.
       For execution fee, use 0.01 ETH (10000000000000000 wei).
-      The prices are in wei format, so use them directly without conversion.`,
+      The prices are in wei format, so use them directly without conversion.
+      
+      IMPORTANT: Return ONLY the JSON object, no other text.`,
     });
 
     console.log("AI response:", result.text);
+    
+    // Extract JSON from the response
+    const jsonMatch = result.text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      throw new Error("No valid JSON found in AI response");
+    }
+    
     // Parse the AI response
-    const orderParams = JSON.parse(result.text);
+    const orderParams = JSON.parse(jsonMatch[0]);
 
     // Validate order parameters
     if (!orderParams.marketAddress || !orderParams.collateralToken) {
