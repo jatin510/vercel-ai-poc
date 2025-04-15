@@ -1,0 +1,15 @@
+ts-node src/sample.ts
+Error: Cannot find module '/Users/jatin/Documents/work/ember/ai-sdk-poc/node_modules/.pnpm/@gmx-io+sdk@0.2.0_bufferutil@4.0.9_react-native-performance@5.1.2_react-native@0.78.1_@babel+_dexku4k4ubygqp3c3w4frnecj4/node_modules/@gmx-io/sdk/build/src/modules/accounts/accounts' imported from /Users/jatin/Documents/work/ember/ai-sdk-poc/node_modules/.pnpm/@gmx-io+sdk@0.2.0_bufferutil@4.0.9_react-native-performance@5.1.2_react-native@0.78.1_@babel+_dexku4k4ubygqp3c3w4frnecj4/node_modules/@gmx-io/sdk/build/src/index.js
+    at finalizeResolution (node:internal/modules/esm/resolve:275:11)
+    at moduleResolve (node:internal/modules/esm/resolve:860:10)
+    at defaultResolve (node:internal/modules/esm/resolve:984:11)
+    at ModuleLoader.defaultResolve (node:internal/modules/esm/loader:780:12)
+    at ModuleLoader.#cachedDefaultResolve (node:internal/modules/esm/loader:704:25)
+    at ModuleLoader.#resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:739:38)
+    at ModuleLoader.resolveSync (node:internal/modules/esm/loader:762:52)
+    at ModuleLoader.#cachedResolveSync (node:internal/modules/esm/loader:723:25)
+    at ModuleLoader.getModuleJobForRequire (node:internal/modules/esm/loader:451:50)
+    at new ModuleJobSync (node:internal/modules/esm/module_job:344:34) {
+  code: 'ERR_MODULE_NOT_FOUND',
+  url: 'file:///Users/jatin/Documents/work/ember/ai-sdk-poc/node_modules/.pnpm/@gmx-io+sdk@0.2.0_bufferutil@4.0.9_react-native-performance@5.1.2_react-native@0.78.1_@babel+_dexku4k4ubygqp3c3w4frnecj4/node_modules/@gmx-io/sdk/build/src/modules/accounts/accounts'
+}
