@@ -140,12 +140,17 @@ export class GmxOrderManager {
     orderRouterAddress: string,
     privateKey: string
   ) {
+    // Initialize Web3 with the provider
     this.web3 = new Web3(rpcUrl);
+    
+    // Set up the account
+    this.account = this.web3.eth.accounts.privateKeyToAccount(privateKey).address;
+    
+    // Initialize the contract
     this.orderRouter = new this.web3.eth.Contract(
       ORDER_ROUTER_ABI,
       this.web3.utils.toChecksumAddress(orderRouterAddress)
     );
-    this.account = this.web3.eth.accounts.privateKeyToAccount(privateKey).address;
   }
 
   async createOrder(params: CreateOrderParams): Promise<string> {
@@ -168,18 +173,42 @@ export class GmxOrderManager {
         flags: params.flags,
         referralCode: params.referralCode,
       };
+      console.log("Order params:", orderParams);
 
-      // Create the order with checksummed market address
+      // Get the nonce for the transaction
+      const nonce = await this.web3.eth.getTransactionCount(this.account);
+      console.log("Nonce:", nonce);
+      
+      // Get gas price
+      const gasPrice = await this.web3.eth.getGasPrice();
+      console.log("Gas price:", gasPrice);
+      // Estimate gas
+      const gasEstimate = await this.orderRouter.methods
+        .createOrder(this.web3.utils.toChecksumAddress(params.marketAddress), orderParams)
+        .estimateGas({ from: this.account });
+      console.log("Gas estimate:", gasEstimate);
+
+      // Create the transaction
       const tx = await this.orderRouter.methods
         .createOrder(this.web3.utils.toChecksumAddress(params.marketAddress), orderParams)
         .send({
           from: this.web3.utils.toChecksumAddress(this.account),
           value: params.executionFee,
+          nonce: nonce.toString(),
+          gasPrice: gasPrice.toString(),
+          gas: Math.floor(Number(gasEstimate) * 1.2).toString(), // Add 20% buffer
         });
+      console.log("Transaction:", tx);
 
       return tx.transactionHash;
     } catch (error) {
       console.error('Error creating order:', error);
+      if (error instanceof Error) {
+        console.error('Error details:', error.message);
+        if ('cause' in error) {
+          console.error('Cause:', error.cause);
+        }
+      }
       throw error;
     }
   }

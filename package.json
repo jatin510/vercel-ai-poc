@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@ai-sdk/openai": "^1.3.4",
-    "@gmx-io/sdk": "^0.0.9",
+    "@gmx-io/sdk": "^0.2.0",
     "@types/web3": "^1.2.2",
     "ai": "^4.2.8",
     "axios": "^1.8.4",
