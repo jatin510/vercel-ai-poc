@@ -10,25 +10,25 @@ const sdk = new GmxSdk({
   subgraphUrl: "https://subgraph.satsuma-prod.com/3b2ced13c8d9/gmx/synthetics-arbitrum-stats/api",
 });
 
-(async()=>{
-    const { marketsInfoData, tokensData, } = await sdk.markets.getMarketsInfo();
+(async () => {
+  try {
+    const { marketsInfoData, tokensData } = await sdk.markets.getMarketsInfo();
     const { marketsData } = await sdk.markets.getMarkets();
 
+    if (!tokensData || !marketsInfoData || !marketsData) {
+      console.error("Failed to fetch market data");
+      return;
+    }
+
+    const positions = await sdk.positions.getPositions({
+      marketsData,
+      tokensData,
+      start: 0,
+      end: 1000,
+    });
     
-
-sdk.setAccount("0x1234567890abcdef1234567890abcdef12345678");
-
-if(!tokensData|| !marketsInfoData|| !marketsData){
-    return;
-}
-sdk.positions
-  .getPositions({
-    marketsData,
-    tokensData,
-    start: 0,
-    end: 1000,
-  })
-  .then((positions) => {
     console.log(positions);
-  });
-})()
+  } catch (error) {
+    console.error("Error:", error);
+  }
+})();

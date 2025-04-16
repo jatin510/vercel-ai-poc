@@ -76,3 +76,35 @@ example command:
 ```
 Buy 1 ETH with 2000 USDC at market price
 ```
+
+# GMX AI Analyzer
+
+CLI tool for analyzing GMX positions with AI.
+
+## Using the GMX SDK
+
+The GMX SDK is currently distributed as an ESM-only package. To use it in this project, we've set up an esbuild configuration that transpiles it to CommonJS format.
+
+### Running the Sample
+
+To run the sample code that demonstrates GMX SDK usage:
+
+```bash
+pnpm sample
+```
+
+This command:
+1. Uses esbuild to bundle the TypeScript code into CommonJS
+2. Executes the bundled code
+
+### Project Structure
+
+- `src/sample.ts` - Example code using the GMX SDK
+- `build.cjs` - esbuild configuration for bundling
+- `dist/sample.cjs` - The bundled output that can be executed directly
+
+### Notes on GMX SDK
+
+The GMX SDK developers have mentioned that they plan to include both ESM and CJS builds in future versions. Until then, this esbuild approach is the recommended way to use the SDK in projects that require CommonJS compatibility.
+
+If you encounter any issues related to module resolution, first try running the sample with `pnpm sample` to ensure the GMX SDK is properly bundled and executed.

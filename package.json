@@ -2,18 +2,22 @@
   "name": "gmx-ai-analyzer",
   "version": "1.0.0",
   "description": "CLI tool for analyzing GMX positions with AI",
+  "type": "module",
   "main": "dist/cli.js",
   "scripts": {
     "build": "tsc",
     "start": "node dist/cli.js",
-    "dev": "ts-node src/cli.ts",
-    "analyze": "ts-node src/cli.ts"
+    "dev": "ts-node-esm src/cli.ts",
+    "analyze": "ts-node-esm src/cli.ts",
+    "build:esbuild": "node build.cjs",
+    "sample": "npm run build:esbuild && node dist/sample.cjs"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "@types/node": "^20.10.5",
+    "esbuild": "^0.25.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
   },
