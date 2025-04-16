@@ -97,9 +97,26 @@ This command:
 1. Uses esbuild to bundle the TypeScript code into CommonJS
 2. Executes the bundled code
 
+### Opening a Long Position
+
+To run the example that demonstrates opening a long position using the GMX SDK:
+
+```bash
+pnpm long-position
+```
+
+This will:
+1. Load the SDK with proper configuration
+2. Set an example account address
+3. Fetch market and token data
+4. Create a sample increase order for a long position
+
+The example uses values from the [GMX SDK documentation](https://github.com/gmx-io/gmx-interface/tree/master/sdk#open-long-position) as a reference.
+
 ### Project Structure
 
-- `src/sample.ts` - Example code using the GMX SDK
+- `src/sample.ts` - Basic example using the GMX SDK
+- `src/openLongPosition.ts` - Example of opening a long position
 - `build.cjs` - esbuild configuration for bundling
 - `dist/sample.cjs` - The bundled output that can be executed directly
 
